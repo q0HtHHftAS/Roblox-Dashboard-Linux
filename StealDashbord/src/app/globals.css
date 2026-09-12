@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0b0d10;
+  --foreground: #e3e6ea;
+  --accent: #6e7bf2;
+  --line: #272c34;
+  --line2: #1e232a;
+  --surface: #181c21;
+  --card: #181c21;
+  --header: #1b1f25;
+  --bg: #0b0d10;
+  /* abyss/cartier.gg - storm logs */
+  --ground: #131619;
+  --chrome: #1b1f25;
+  --ink: #e3e6ea;
+  --muted: #7c838f;
+  --brand: #6e7bf2;
+  /* Motion System (locked): Fast = micro interaction / Normal = hover / Slow = enter — easing เดียวทั้งระบบ */
+  --motion-fast: 120ms;
+  --motion-normal: 180ms;
+  --motion-slow: 240ms;
+  --motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-line: var(--line);
+  --color-line2: var(--line2);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-header: var(--header);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ไทยทั้งหมดบังคับ Regular 400: face นี้ serve โครง 400 ให้ทุกน้ำหนักที่ขอ (400-900)
+   unicode-range ครอบเฉพาะ glyph ไทย — ตัวเลข/ละตินยังใช้ฟอนต์เดิม (self-host ไม่ต้องแก้ CSP) */
+@font-face {
+  font-family: "Thai-Regular";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("/fonts/kanit-thai-400.woff2") format("woff2");
+  unicode-range: U+02D7, U+0303, U+0331, U+0E01-0E5B, U+200C-200D, U+25CC;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #272c34 #0b0d10;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #272c34; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #323a47; }
+
+html {
+  background: #0b0d10;
+  /* กันหน้าไหลแนวนอนบนจอมือถือ (clip ไม่ทำลาย sticky/fixed) */
+  overflow-x: clip;
+  /* จองที่ scrollbar ฝั่งขวาไว้ตลอด — เปิด/ปิด popup แล้วความกว้าง layout ไม่เปลี่ยนเลย
+     พื้นหลังเลยไม่ขยับ (วิธีนี้แทนการชดเชย padding-right ด้วย JS ทีหลัง paint) */
+  scrollbar-gutter: stable;
+}
+body {
+  background: #0b0d10;
+  color: var(--foreground);
+  font-family: "Thai-Regular", var(--font-body), var(--font-kanit), "Segoe UI", system-ui, sans-serif;
+  font-weight: 700;
+}
+
+.tabs-x { scrollbar-width: none; padding-bottom: 1px; overflow-x: auto; }
+.tabs-x::-webkit-scrollbar { display: none; }
+.tabs-x > * { flex-shrink: 0; }
+
+/* Popup ปรากฏทันที ไม่เล่น entrance/exit (กันพื้นหลังดูกระตุก) */
+
+@keyframes dropdown-in { 0% { opacity: 0; transform: translateY(-2px); } 100% { opacity: 1; transform: none; } }
+
+/* Dropdown = layer ปรากฏทันที (fade + ขยับ 2px, ไม่มี scale) — แทน `animate-in fade-in zoom-in-95` (ไม่ได้ลง plugin tailwindcss-animate) */
+.dropdown-in { animation: dropdown-in 120ms cubic-bezier(0.16, 1, 0.3, 1); transform-origin: top right; }
+
+/* Live status breathing — opacity + scale เล็กน้อย ไม่มี animated glow (glow ดู decorative เกิน) */
+@keyframes live-glow {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+}
+
+.live-dot {
+  animation: live-glow 2.6s ease-in-out infinite;
+}
+
+/* Motion primitive กลางระบบ (ENTER): page / section / card ใช้ตัวเดียวกัน ต่างกันแค่ animation-delay
+   subtle appearance ไม่ใช่ entrance — opacity + ขยับ 6px, 240ms, easing หลัก */
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-enter {
+  animation: enter 240ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+/* Animation ถูกบังคับให้เล่นเสมอ ไม่เคารพ prefers-reduced-motion ของ OS (ตามคำขอเจ้าของเว็บ) */
+
+
