@@ -31,9 +31,16 @@ cp StealDashbord/prisma/dev.db.bak-20260911-admin StealDashbord/prisma/dev.db
 cd StealDashbord && npx prisma generate && npx prisma db push && cd ..
 
 # 3. ไฟล์ .env (ห้าม commit)
-cp StealDashbord/.env.example StealDashbord/.env
+# บอทมีตัวอย่างให้: robloxupdatetracker/.env.example
 cp robloxupdatetracker/.env.example robloxupdatetracker/.env
-# แล้วแก้ค่า: AUTH_URL, NEXT_PUBLIC_SITE_URL, DISCORD_CLIENT_ID/SECRET, tokens
+# ของเว็บไม่มี .env.example ใน repo (ถูก ignore) ให้สร้าง StealDashbord/.env เอง:
+# DATABASE_URL="file:./dev.db"
+# AUTH_SECRET="<สุ่มด้วย: openssl rand -base64 32>"
+# AUTH_TRUST_HOST=true
+# AUTH_URL="https://<hostname>.<tailnet>.ts.net"
+# NEXT_PUBLIC_SITE_URL="https://<hostname>.<tailnet>.ts.net"
+# DISCORD_CLIENT_ID / DISCORD_CLIENT_SECRET (และ AUTH_DISCORD_ID / AUTH_DISCORD_SECRET ค่าเดียวกัน)
+# ALLOWED_DISCORD_IDS / ALLOWED_DISCORD_GUILD_ID / DISCORD_BOT_TOKEN / ADMIN_DISCORD_IDS
 ```
 
 > หมายเหตุ: `node_modules/`, `.next/`, `dist/`, `.env`, `*.db` ถูก ignore ไว้แล้ว จะไม่ติดไปกับ commit
