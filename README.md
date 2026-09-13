@@ -1,5 +1,7 @@
 # Roblox Dashboard (Linux)
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/80c15b4c-fd6d-4126-a98e-df63b098f270" />
+
 โปรเจกต์รันบน Ubuntu ประกอบด้วย 2 ตัว: เว็บแดชบอร์ด Next.js + บอท Discord ติดตามอัปเดต Roblox ย้ายมาจาก Windows autostart ด้วย PM2 และเปิดเว็บออกอินเทอร์เน็ตผ่าน Tailscale Funnel
 
 ## โครงสร้าง
