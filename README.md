@@ -2,76 +2,121 @@
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/80c15b4c-fd6d-4126-a98e-df63b098f270" />
 
-โปรเจกต์รันบน Ubuntu ประกอบด้วย 2 ตัว: เว็บแดชบอร์ด Next.js + บอท Discord ติดตามอัปเดต Roblox ย้ายมาจาก Windows autostart ด้วย PM2 และเปิดเว็บออกอินเทอร์เน็ตผ่าน Tailscale Funnel
+This project runs on Ubuntu.
+The project has two parts: the web dashboard that uses Next.js, and the Discord bot that tracks Roblox updates.
+PM2 starts both parts on boot.
+Tailscale Funnel exposes the web dashboard to the internet.
 
-## โครงสร้าง
+## Structure
+
+The repository contains the folders and files below:
 
 ```
 .
-├── StealDashbord/          # เว็บ Next.js 16 (port 3000, pm2 ชื่อ steal-dash)
-├── robloxupdatetracker/    # บอท Discord TypeScript (pm2 ชื่อ roblox-bot)
-├── ecosystem.config.js     # config PM2 รวมทั้ง 2 ตัว
-├── start-all.sh            # สตาร์ททั้งหมด
-└── stop-all.sh             # หยุดทั้งหมด
+├── StealDashbord/          # Next.js 16 web (port 3000, pm2 name steal-dash)
+├── robloxupdatetracker/    # Discord bot in TypeScript (pm2 name roblox-bot)
+├── ecosystem.config.js     # PM2 configuration for both parts
+├── start-all.sh            # starts all parts
+└── stop-all.sh             # stops all parts
 ```
 
-## สิ่งที่ต้องมี
+The StealDashbord folder holds the Next.js web dashboard that runs on port 3000 with the PM2 name steal-dash.
+The robloxupdatetracker folder holds the Discord bot that uses TypeScript with the PM2 name roblox-bot.
+The ecosystem.config.js file holds the PM2 configuration for both parts.
 
-- Ubuntu 22.04+ / Node.js 22+ / npm / Python 3.12+ (มี pip + venv)
-- `pm2` (`npm install -g pm2`), `sqlite3`, `build-essential`
-- Tailscale (สำหรับเปิดเว็บออกเน็ต) + Discord Bot token
+## Requirements
 
-## ติดตั้งครั้งแรก
+The host must have the items below:
+
+- Run Ubuntu 22.04 or later with Node.js 22 or later, npm, and Python 3.12 or later with pip and venv.
+- Install pm2, sqlite3, and build-essential on the host.
+- Install Tailscale on the host.
+- Get a Discord bot token.
+
+To install pm2, run npm install -g pm2 on the host.
+The host uses sqlite3 for the local database and build-essential to build native modules.
+The host uses Tailscale to expose the web dashboard and uses the Discord bot token to run the bot.
+
+## First Install
+
+Complete the steps below on the Ubuntu host.
+Do not commit the .env files to the repository. The files hold secrets.
+
+1. Install dependencies for each project:
 
 ```bash
-# 1. dependencies ของแต่ละโปรเจกต์
 cd StealDashbord && npm install && cd ..
 cd robloxupdatetracker && npm install && npm run build && cd ..
+```
 
-# 2. กู้/สร้าง database ของเว็บ (SQLite)
+2. Restore the web database file for SQLite:
+
+```bash
 cp StealDashbord/prisma/dev.db.bak-20260911-admin StealDashbord/prisma/dev.db
 cd StealDashbord && npx prisma generate && npx prisma db push && cd ..
+```
 
-# 3. ไฟล์ .env (ห้าม commit)
-# บอทมีตัวอย่างให้: robloxupdatetracker/.env.example
+3. Create the .env files for the bot and the web dashboard.
+For the bot, copy the example file:
+
+```bash
 cp robloxupdatetracker/.env.example robloxupdatetracker/.env
-# ของเว็บไม่มี .env.example ใน repo (ถูก ignore) ให้สร้าง StealDashbord/.env เอง:
-# DATABASE_URL="file:./dev.db"
-# AUTH_SECRET="<สุ่มด้วย: openssl rand -base64 32>"
-# AUTH_TRUST_HOST=true
-# AUTH_URL="https://<hostname>.<tailnet>.ts.net"
-# NEXT_PUBLIC_SITE_URL="https://<hostname>.<tailnet>.ts.net"
-# DISCORD_CLIENT_ID / DISCORD_CLIENT_SECRET (และ AUTH_DISCORD_ID / AUTH_DISCORD_SECRET ค่าเดียวกัน)
-# ALLOWED_DISCORD_IDS / ALLOWED_DISCORD_GUILD_ID / DISCORD_BOT_TOKEN / ADMIN_DISCORD_IDS
 ```
 
-> หมายเหตุ: `node_modules/`, `.next/`, `dist/`, `.env`, `*.db` ถูก ignore ไว้แล้ว จะไม่ติดไปกับ commit
+For the web dashboard, create StealDashbord/.env with the entries below. The repository has no example file for the web dashboard because the file is ignored.
 
-## รัน
-
-```bash
-./start-all.sh     # pm2 startOrReload + save
-pm2 list           # ดูสถานะ
-pm2 logs           # ดู log
-./stop-all.sh      # หยุดทั้งหมด
+```text
+DATABASE_URL="file:./dev.db"
+AUTH_SECRET="<random value from: openssl rand -base64 32>"
+AUTH_TRUST_HOST=true
+AUTH_URL="https://<hostname>.<tailnet>.ts.net"
+NEXT_PUBLIC_SITE_URL="https://<hostname>.<tailnet>.ts.net"
+DISCORD_CLIENT_ID / DISCORD_CLIENT_SECRET (same values as AUTH_DISCORD_ID / AUTH_DISCORD_SECRET)
+ALLOWED_DISCORD_IDS / ALLOWED_DISCORD_GUILD_ID / DISCORD_BOT_TOKEN / ADMIN_DISCORD_IDS
 ```
 
-## เปิดเว็บออกอินเทอร์เน็ต (Tailscale Funnel)
+The node_modules, .next, dist, .env, and .db files are ignored and will not go into the commit.
+
+## Run
+
+To start all parts, run the command below on the Ubuntu host:
 
 ```bash
-sudo tailscale up              # login ครั้งแรก
+./start-all.sh
+```
+
+The script uses pm2 startOrReload and saves the process list.
+To see the status, run pm2 list on the host.
+To see the logs, run pm2 logs on the host.
+To stop all parts, run ./stop-all.sh on the host.
+
+## Expose the Web Through Tailscale Funnel
+
+To expose the web dashboard to the internet, complete the steps below.
+The web dashboard runs on port 3000 on the Ubuntu host.
+
+1. Log in to Tailscale one time:
+
+```bash
+sudo tailscale up
+```
+
+2. Start the funnel in the background:
+
+```bash
 sudo tailscale funnel --bg 3000
-# จะได้ https://<hostname>.<tailnet>.ts.net/
 ```
 
-หลังได้ URL ต้องแก้ให้ตรงกัน 2 ที่แล้วรีสตาร์ทเว็บ:
+The command returns a public address in the form https://<hostname>.<tailnet>.ts.net/.
+After you get the address, update the two locations below and restart the web dashboard.
+Set AUTH_URL and NEXT_PUBLIC_SITE_URL in StealDashbord/.env to the public address.
+Add https://<url>/api/auth/callback/discord to OAuth2 Redirects in the Discord Developer Portal.
 
-1. `StealDashbord/.env` → `AUTH_URL` และ `NEXT_PUBLIC_SITE_URL`
-2. Discord Developer Portal → OAuth2 → Redirects เพิ่ม `https://<url>/api/auth/callback/discord`
+## Notes About the Move From Windows
 
-## หมายเหตุการย้ายจาก Windows
+The Linux version differs from the Windows version in the ways below:
 
-- ไฟล์ `.bat` ถูกแทนด้วย `.sh` แล้ว
-- `ecosystem.config.js` ใช้ path แบบ Linux (`path.join(__dirname, ...)`)
-- native module (`better-sqlite3`, `lightningcss`) ต้อง `npm install`/`rebuild` ใหม่บน Linux ห้ามก๊อป `node_modules` ข้าม OS
-- Prisma client ต้อง `prisma generate` ใหม่บน Linux (binaryTargets `debian-openssl-3.0.x`)
+- Use .sh files in place of .bat files.
+- Use Linux paths in ecosystem.config.js with path.join(__dirname, ...).
+- Install or rebuild native modules such as better-sqlite3 and lightningcss on Linux. Do not copy node_modules across operating systems.
+- Generate the Prisma client on Linux. The client uses binaryTargets debian-openssl-3.0.x.
